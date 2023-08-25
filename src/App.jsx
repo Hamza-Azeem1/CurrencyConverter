@@ -10,7 +10,7 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const API_KEY = import.meta.env.VITE_CONVERTER_API_KEY;
-  const API_URL = `http://data.fixer.io/api/latest?access_key=${API_KEY}`;
+  const API_URL = `https://data.fixer.io/api/latest?access_key=${API_KEY}`;
 
   const [currencyOptions, setCurrencyOptions] = useState([]);
 
