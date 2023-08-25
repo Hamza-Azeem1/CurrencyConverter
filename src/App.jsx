@@ -9,7 +9,7 @@ const App = () => {
   const [convertedAmount, setConvertedAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const API_KEY = import.meta.env.VITE_CONVERTER_API_KEY;
+  const API_KEY = import.meta.env.VITE_CURRENCY_LAYER_API_KEY;
   const API_URL = `https://data.fixer.io/api/latest?access_key=${API_KEY}`;
 
   const [currencyOptions, setCurrencyOptions] = useState([]);
@@ -23,21 +23,21 @@ const App = () => {
         return response.json();
       })
       .then(data => {
-        if (data.rates) {
-          const rates = data.rates;
-          const options = Object.keys(rates);
-          setCurrencyOptions(options);
-          const rate = rates[toCurrency] / rates[fromCurrency];
-          setConversionRate(rate);
-        } else {
-          throw new Error('Currency rates data not available.');
+        if (!data.rates) {
+          throw new Error('Currency rates data not available in API response.');
         }
+
+        const rates = data.rates;
+        const options = Object.keys(rates);
+        setCurrencyOptions(options);
+        const rate = rates[toCurrency] / rates[fromCurrency];
+        setConversionRate(rate);
       })
       .catch(error => {
-        console.error('An error occurred while fetching currency data:', error);
+        console.error('An error occurred while fetching currency data:', error.message);
+        // Handle error, set an error state, or display a message to the user.
       });
   }, [fromCurrency, toCurrency, API_URL]);
-
 
   const handleConvert = () => {
     if (!amount) {
