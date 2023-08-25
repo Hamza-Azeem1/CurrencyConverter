@@ -10,21 +10,34 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const API_KEY = import.meta.env.VITE_CONVERTER_API_KEY;
-  const API_URL = `http://data.fixer.io/api/latest?access_key=${API_KEY}`;
+  const API_URL = `https://data.fixer.io/api/latest?access_key=${API_KEY}`;
 
   const [currencyOptions, setCurrencyOptions] = useState([]);
 
   useEffect(() => {
     fetch(API_URL)
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch currency data.');
+        }
+        return response.json();
+      })
       .then(data => {
-        const rates = data.rates;
-        const options = Object.keys(rates);
-        setCurrencyOptions(options);
-        const rate = rates[toCurrency] / rates[fromCurrency];
-        setConversionRate(rate);
+        if (data.rates) {
+          const rates = data.rates;
+          const options = Object.keys(rates);
+          setCurrencyOptions(options);
+          const rate = rates[toCurrency] / rates[fromCurrency];
+          setConversionRate(rate);
+        } else {
+          throw new Error('Currency rates data not available.');
+        }
+      })
+      .catch(error => {
+        console.error('An error occurred while fetching currency data:', error);
       });
-  }, [API_URL, fromCurrency, toCurrency]);
+  }, [fromCurrency, toCurrency, API_URL]);
+
 
   const handleConvert = () => {
     if (!amount) {
