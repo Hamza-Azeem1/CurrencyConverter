@@ -9,22 +9,39 @@ const App = () => {
   const [convertedAmount, setConvertedAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const API_KEY = import.meta.env.VITE_CONVERTER_API_KEY;
-  const API_URL = `http://data.fixer.io/api/latest?access_key=${API_KEY}`;
+  const API_KEY = import.meta.env.VITE_API_KEY;
+  const API_HOST = import.meta.env.VITE_API_HOST;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const [currencyOptions, setCurrencyOptions] = useState([]);
 
   useEffect(() => {
-    fetch(API_URL)
+    if (!API_KEY || !API_HOST || !API_URL) {
+      setErrorMessage('API configuration is missing.');
+      return;
+    }
+
+    fetch(API_URL, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': API_KEY,
+        'X-RapidAPI-Host': API_HOST
+      }
+    })
       .then(response => response.json())
       .then(data => {
         const rates = data.rates;
         const options = Object.keys(rates);
         setCurrencyOptions(options);
+
         const rate = rates[toCurrency] / rates[fromCurrency];
         setConversionRate(rate);
+      })
+      .catch(error => {
+        console.error('Error fetching currency data:', error);
+        setErrorMessage('Error fetching currency data.');
       });
-  }, [API_URL, fromCurrency, toCurrency]);
+  }, [API_KEY, API_HOST, API_URL, fromCurrency, toCurrency]);
 
   const handleConvert = () => {
     if (!amount) {
@@ -32,13 +49,11 @@ const App = () => {
       setConvertedAmount('');
       return;
     }
-
     if (isNaN(amount) || !/^\d+(\.\d{1,2})?$/.test(amount)) {
       setErrorMessage('Invalid input. Please enter a valid amount.');
       setConvertedAmount('');
       return;
     }
-
     const convertedValue = (parseFloat(amount) * conversionRate).toFixed(2);
     setConvertedAmount(convertedValue);
     setErrorMessage('');
@@ -47,9 +62,7 @@ const App = () => {
   return (
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-r from-blue-200 to-green-200">
       <div className="bg-white p-6 rounded-md shadow-md w-full max-w-md">
-        <h1 className="text-4xl font-bold mb-6 text-center text-gray-700">
-          Currency Converter
-        </h1>
+        <h1 className="text-4xl font-bold mb-6 text-center text-gray-700">Currency Converter</h1>
         <div className="mb-6">
           <input
             type="text"
