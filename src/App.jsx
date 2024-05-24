@@ -8,6 +8,7 @@ const App = () => {
   const [conversionRate, setConversionRate] = useState(1);
   const [convertedAmount, setConvertedAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [displayAmount, setDisplayAmount] = useState('');
 
   const API_KEY = import.meta.env.VITE_API_KEY;
   const API_HOST = import.meta.env.VITE_API_HOST;
@@ -50,12 +51,13 @@ const App = () => {
       return;
     }
     if (isNaN(amount) || !/^\d+(\.\d{1,2})?$/.test(amount)) {
-      setErrorMessage('Invalid input. Please enter a valid amount.');
+      setErrorMessage('Invalid input. Please enter a valid amount number. Alpabets and other character are invalid!');
       setConvertedAmount('');
       return;
     }
     const convertedValue = (parseFloat(amount) * conversionRate).toFixed(2);
     setConvertedAmount(convertedValue);
+    setDisplayAmount(amount);
     setErrorMessage('');
   };
 
@@ -100,7 +102,7 @@ const App = () => {
         </button>
         {convertedAmount && (
           <p className="text-xl font-semibold mt-6">
-            {amount} {fromCurrency} = {convertedAmount} {toCurrency}
+            {displayAmount} {fromCurrency} = {convertedAmount} {toCurrency}
           </p>
         )}
       </div>
